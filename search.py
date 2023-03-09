@@ -4,7 +4,6 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -19,6 +18,33 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
+class Node:
+    def __init__(self, state, parent=None, action=None):
+        self.state = state
+        self.parent = parent
+        self.action = action
+
+    def get_action_path(self):
+        """
+        Get the list of actions from the start state to the current Node
+        """
+        actions = []
+        node = self
+        while node.parent:
+            actions.append(node.action)
+            node = node.parent
+
+        return actions[::-1]
+
+    def get_successors(self, problem):
+        """
+        Get the successors of the current Node
+        """
+        return [
+            Node(state=successor, parent=self, action=action)
+            for successor, action, _cost in problem.getSuccessors(self.state)
+        ]
 
 class SearchProblem:
     """
@@ -88,14 +114,42 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
-    util.raise_method_not_defined()
+    start_node = Node(problem.getStartState())
 
+    stack = util.Stack()
+    stack.push(start_node)
+
+    visited = set()
+
+    while not stack.isEmpty():
+        node = stack.pop()
+
+        if problem.isGoalState(node.state):
+            return node.get_action_path()
+
+        if node.state not in visited:
+            visited.add(node.state)
+            for successor in node.get_successors(problem):
+                stack.push(successor)
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raise_method_not_defined()
+    start_node = Node(problem.getStartState())
+
+    queue = util.Queue()
+    queue.push(start_node)
+    visited = set()
+
+    while not queue.isEmpty():
+        node = queue.pop()
+
+        if problem.isGoalState(node.state):
+            return node.get_action_path()
+
+        if node.state not in visited:
+            visited.add(node.state)
+            for successor in node.get_successors(problem):
+                queue.push(successor)
 
 
 def uniformCostSearch(problem):
